@@ -327,81 +327,83 @@ def generate_nonce():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    # Log all request details
-    app.logger.debug(f"Login Request Method: {request.method}")
-    app.logger.debug(f"Request Form Data: {request.form}")
-    app.logger.debug(f"Request Args: {request.args}")
-    app.logger.debug(f"Session Data: {dict(session)}")
+    # EXTREME DEBUGGING MODE
+    print("!!!!! LOGIN ROUTE CALLED !!!!!")
+    app.logger.critical("!!!!! LOGIN ROUTE CALLED !!!!!")
+    
+    # Log ALL possible information
+    print(f"Request Method: {request.method}")
+    print(f"Request Form: {request.form}")
+    print(f"Request Args: {request.args}")
+    print(f"Session Data: {dict(session)}")
+    
+    app.logger.critical(f"Request Method: {request.method}")
+    app.logger.critical(f"Request Form: {request.form}")
+    app.logger.critical(f"Request Args: {request.args}")
+    app.logger.critical(f"Session Data: {dict(session)}")
 
-    # Temporarily disable CSRF protection for debugging
+    # Completely disable CSRF for debugging
     app.config['WTF_CSRF_ENABLED'] = False
+    app.config['WTF_CSRF_CHECK_DEFAULT'] = False
     
     if current_user.is_authenticated:
-        app.logger.info("User already authenticated, redirecting to dashboard")
+        print("User is already authenticated")
+        app.logger.critical("User is already authenticated")
         return redirect(url_for('dashboard'))
 
     form = LoginForm()
     
-    # Log form validation details
-    app.logger.debug(f"Form Errors: {form.errors}")
-    app.logger.debug(f"Form Data: {form.data}")
+    # Log form details
+    print(f"Form Errors: {form.errors}")
+    print(f"Form Data: {form.data}")
+    app.logger.critical(f"Form Errors: {form.errors}")
+    app.logger.critical(f"Form Data: {form.data}")
 
-    if form.validate_on_submit():
+    if request.method == 'POST':
+        print("POST REQUEST RECEIVED")
+        app.logger.critical("POST REQUEST RECEIVED")
+        
+        # Manual form validation
+        user_id = request.form.get('user_id')
+        password = request.form.get('password')
+        
+        print(f"Attempting login with User ID: {user_id}")
+        app.logger.critical(f"Attempting login with User ID: {user_id}")
+        
         try:
-            user_id = form.user_id.data
-            password = form.password.data
-            app.logger.info(f"Login attempt - User ID: {user_id}")
-            
-            # Detailed database query logging
-            app.logger.debug(f"Attempting to find user with ID: {user_id}")
+            # Find user manually
             user = User.query.filter_by(user_id=user_id).first()
             
             if user:
-                app.logger.info(f"User found - Username: {user.username}, Full Name: {user.full_name}")
+                print(f"User found: {user.username}")
+                app.logger.critical(f"User found: {user.username}")
                 
-                # Log additional user details
-                app.logger.debug(f"User Details: {user.__dict__}")
-                
-                if not user.is_active:
-                    app.logger.warning(f"Login attempt for inactive user: {user_id}")
-                    flash('This account has been deactivated. Please contact an administrator.', 'error')
-                    return render_template('login.html', form=form)
-                
-                # Detailed password checking
-                app.logger.debug("Attempting password check")
+                # Check password manually
                 is_valid = user.check_password(password)
-                app.logger.info(f"Password check result: {is_valid}")
+                
+                print(f"Password check result: {is_valid}")
+                app.logger.critical(f"Password check result: {is_valid}")
                 
                 if is_valid:
-                    # Update last login time
-                    user.last_login = datetime.now(timezone.utc)
-                    db.session.commit()
-                    
-                    # Remember me functionality
-                    remember = form.remember.data == 'True'
-                    login_user(user, remember=remember)
-                    app.logger.info(f"User {user_id} logged in successfully")
-                    flash('Logged in successfully!', 'success')
-                    
-                    # Get the next page from args, fallback to referrer, then dashboard
-                    next_page = request.args.get('next')
-                    if not next_page or not next_page.startswith('/'):
-                        next_page = request.referrer
-                    if not next_page:
-                        next_page = url_for('dashboard')
-                    
-                    app.logger.info(f"Redirecting to: {next_page}")
-                    return redirect(next_page)
+                    login_user(user)
+                    print("Login successful")
+                    app.logger.critical("Login successful")
+                    return redirect(url_for('dashboard'))
                 else:
-                    app.logger.warning(f"Invalid password for user: {user_id}")
+                    print("Invalid password")
+                    app.logger.critical("Invalid password")
             else:
-                app.logger.warning(f"User not found: {user_id}")
-            
-            flash('Invalid user ID or password.', 'error')
+                print("User not found")
+                app.logger.critical("User not found")
+        
         except Exception as e:
-            app.logger.error(f"Login error: {str(e)}", exc_info=True)
-            flash('An error occurred during login. Please try again.', 'error')
-
+            print(f"Login error: {e}")
+            app.logger.critical(f"Login error: {e}", exc_info=True)
+    
+    # Always log when rendering login template
+    print("Rendering login template")
+    app.logger.critical("Rendering login template")
+    
     return render_template('login.html', form=form)
 
 # Route to add a new user

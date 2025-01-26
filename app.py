@@ -287,9 +287,12 @@ def load_user(user_id):
 # Database connection verification
 def verify_database_connection():
     try:
+        # Use SQLAlchemy's text() function for raw SQL queries
+        from sqlalchemy import text
+        
         # Attempt to create a connection and perform a simple query
         with app.app_context():
-            result = db.session.execute('SELECT 1').scalar()
+            result = db.session.execute(text('SELECT 1')).scalar()
             app.logger.info(f"Database connection verified. Test query result: {result}")
             return True
     except Exception as e:

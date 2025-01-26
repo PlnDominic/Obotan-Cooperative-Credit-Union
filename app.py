@@ -23,12 +23,48 @@ from functools import wraps
 from models import db, User, Role, WorkEntry, Customer, WorkSubmission  # Import all models
 import re
 import dotenv
+import logging
+from logging.handlers import RotatingFileHandler
 
 # Load environment variables
-dotenv.load_dotenv()
+import os
+from dotenv import load_dotenv
+
+# Priority: .env.local > .env.production > .env
+if os.path.exists('.env.local'):
+    load_dotenv('.env.local', override=True)
+elif os.path.exists('.env.production'):
+    load_dotenv('.env.production', override=True)
+else:
+    load_dotenv()
 
 # Initialize Flask app
 app = Flask(__name__)
+
+# Enhanced Logging Configuration
+def setup_logging():
+    # Ensure logs directory exists
+    log_dir = 'logs'
+    os.makedirs(log_dir, exist_ok=True)
+    
+    # Configure logging
+    log_file = os.path.join(log_dir, 'app.log')
+    handler = RotatingFileHandler(log_file, maxBytes=10000, backupCount=3)
+    handler.setLevel(logging.DEBUG)
+    
+    # Create a logging format
+    formatter = logging.Formatter(
+        '%(asctime)s - %(name)s - %(levelname)s - '
+        'File: %(filename)s - Line: %(lineno)d - Message: %(message)s'
+    )
+    handler.setFormatter(formatter)
+    
+    # Add handler to the app's logger
+    app.logger.addHandler(handler)
+    app.logger.setLevel(logging.DEBUG)
+
+# Call logging setup
+setup_logging()
 
 # Security configurations
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'postgresql://postgres:1234@localhost/obotan')
@@ -239,6 +275,21 @@ class DailyWithdrawalForm(FlaskForm):
 def load_user(user_id):
     return User.query.get(int(user_id))
 
+# Database connection verification
+def verify_database_connection():
+    try:
+        # Attempt to create a connection and perform a simple query
+        with app.app_context():
+            result = db.session.execute('SELECT 1').scalar()
+            app.logger.info(f"Database connection verified. Test query result: {result}")
+            return True
+    except Exception as e:
+        app.logger.error(f"Database connection error: {str(e)}", exc_info=True)
+        return False
+
+# Call database verification on app startup
+verify_database_connection()
+
 # Database connection
 def get_db_connection():
     conn = psycopg2.connect("dbname='obotan' user='postgres' password='1234' host='localhost'")
@@ -261,6 +312,85 @@ def role_required(allowed_roles):
 def generate_nonce():
     if 'nonce' not in session:
         session['nonce'] = secrets.token_hex(16)
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    # Log all request details
+    app.logger.debug(f"Login Request Method: {request.method}")
+    app.logger.debug(f"Request Form Data: {request.form}")
+    app.logger.debug(f"Request Args: {request.args}")
+    app.logger.debug(f"Session Data: {dict(session)}")
+
+    # Temporarily disable CSRF protection for debugging
+    app.config['WTF_CSRF_ENABLED'] = False
+    
+    if current_user.is_authenticated:
+        app.logger.info("User already authenticated, redirecting to dashboard")
+        return redirect(url_for('dashboard'))
+
+    form = LoginForm()
+    
+    # Log form validation details
+    app.logger.debug(f"Form Errors: {form.errors}")
+    app.logger.debug(f"Form Data: {form.data}")
+
+    if form.validate_on_submit():
+        try:
+            user_id = form.user_id.data
+            password = form.password.data
+            app.logger.info(f"Login attempt - User ID: {user_id}")
+            
+            # Detailed database query logging
+            app.logger.debug(f"Attempting to find user with ID: {user_id}")
+            user = User.query.filter_by(user_id=user_id).first()
+            
+            if user:
+                app.logger.info(f"User found - Username: {user.username}, Full Name: {user.full_name}")
+                
+                # Log additional user details
+                app.logger.debug(f"User Details: {user.__dict__}")
+                
+                if not user.is_active:
+                    app.logger.warning(f"Login attempt for inactive user: {user_id}")
+                    flash('This account has been deactivated. Please contact an administrator.', 'error')
+                    return render_template('login.html', form=form)
+                
+                # Detailed password checking
+                app.logger.debug("Attempting password check")
+                is_valid = user.check_password(password)
+                app.logger.info(f"Password check result: {is_valid}")
+                
+                if is_valid:
+                    # Update last login time
+                    user.last_login = datetime.now(timezone.utc)
+                    db.session.commit()
+                    
+                    # Remember me functionality
+                    remember = form.remember.data == 'True'
+                    login_user(user, remember=remember)
+                    app.logger.info(f"User {user_id} logged in successfully")
+                    flash('Logged in successfully!', 'success')
+                    
+                    # Get the next page from args, fallback to referrer, then dashboard
+                    next_page = request.args.get('next')
+                    if not next_page or not next_page.startswith('/'):
+                        next_page = request.referrer
+                    if not next_page:
+                        next_page = url_for('dashboard')
+                    
+                    app.logger.info(f"Redirecting to: {next_page}")
+                    return redirect(next_page)
+                else:
+                    app.logger.warning(f"Invalid password for user: {user_id}")
+            else:
+                app.logger.warning(f"User not found: {user_id}")
+            
+            flash('Invalid user ID or password.', 'error')
+        except Exception as e:
+            app.logger.error(f"Login error: {str(e)}", exc_info=True)
+            flash('An error occurred during login. Please try again.', 'error')
+
+    return render_template('login.html', form=form)
 
 # Route to add a new user
 @app.route('/add_user', methods=['GET', 'POST'])
@@ -401,62 +531,6 @@ def delete_user(user_id):
         flash(f'Error deleting user: {str(e)}', 'danger')
     
     return redirect(url_for('manage_users'))
-
-# Login route
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    if current_user.is_authenticated:
-        return redirect(url_for('dashboard'))
-
-    form = LoginForm()
-    if form.validate_on_submit():
-        try:
-            user_id = form.user_id.data
-            password = form.password.data
-            app.logger.info(f"Login attempt - User ID: {user_id}")
-            
-            user = User.query.filter_by(user_id=user_id).first()
-            if user:
-                app.logger.info(f"User found - Username: {user.username}, Full Name: {user.full_name}")
-                
-                if not user.is_active:
-                    app.logger.warning(f"Login attempt for inactive user: {user_id}")
-                    flash('This account has been deactivated. Please contact an administrator.', 'error')
-                    return render_template('login.html', form=form, nonce=session.get('nonce'))
-                
-                is_valid = user.check_password(password)
-                app.logger.info(f"Password check result: {is_valid}")
-                
-                if is_valid:
-                    # Update last login time
-                    user.last_login = datetime.now(timezone.utc)
-                    db.session.commit()
-                    
-                    # Remember me functionality
-                    remember = form.remember.data == 'True'
-                    login_user(user, remember=remember)
-                    flash('Logged in successfully!', 'success')
-                    
-                    # Get the next page from args, fallback to referrer, then dashboard
-                    next_page = request.args.get('next')
-                    if not next_page or not next_page.startswith('/'):
-                        next_page = request.referrer
-                    if not next_page:
-                        next_page = url_for('dashboard')
-                    
-                    app.logger.info(f"Redirecting to: {next_page}")
-                    return redirect(next_page)
-                else:
-                    app.logger.warning(f"Invalid password for user: {user_id}")
-            else:
-                app.logger.warning(f"User not found: {user_id}")
-            
-            flash('Invalid user ID or password.', 'error')
-        except Exception as e:
-            app.logger.error(f"Login error: {str(e)}")
-            flash('An error occurred during login. Please try again.', 'error')
-
-    return render_template('login.html', form=form, nonce=session.get('nonce'))
 
 # Profile management routes
 @app.route('/update_profile', methods=['POST'])

@@ -49,19 +49,28 @@ def setup_logging():
     
     # Configure logging
     log_file = os.path.join(log_dir, 'app.log')
-    handler = RotatingFileHandler(log_file, maxBytes=10000, backupCount=3)
+    handler = RotatingFileHandler(log_file, maxBytes=100000, backupCount=5)
     handler.setLevel(logging.DEBUG)
     
-    # Create a logging format
+    # Create a logging format with CRITICAL emphasis
     formatter = logging.Formatter(
-        '%(asctime)s - %(name)s - %(levelname)s - '
+        '!!! CRITICAL !!! %(asctime)s - %(name)s - %(levelname)s - '
         'File: %(filename)s - Line: %(lineno)d - Message: %(message)s'
     )
     handler.setFormatter(formatter)
     
-    # Add handler to the app's logger
+    # Console handler for immediate visibility
+    console_handler = logging.StreamHandler()
+    console_handler.setLevel(logging.ERROR)
+    console_handler.setFormatter(formatter)
+    
+    # Add handlers to the app's logger
     app.logger.addHandler(handler)
+    app.logger.addHandler(console_handler)
     app.logger.setLevel(logging.DEBUG)
+
+    # Print to stdout for Render logs
+    print("Logging setup complete. Logging to:", log_file)
 
 # Call logging setup
 setup_logging()

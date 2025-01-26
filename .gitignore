@@ -48,6 +48,8 @@ Thumbs.db
 .env
 *.pem
 *.key
+.env.local
+.env.production
 
 # Backup files
 *.bak

@@ -327,82 +327,41 @@ def generate_nonce():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    # EXTREME DEBUGGING MODE
-    print("!!!!! LOGIN ROUTE CALLED !!!!!")
-    app.logger.critical("!!!!! LOGIN ROUTE CALLED !!!!!")
-    
-    # Log ALL possible information
-    print(f"Request Method: {request.method}")
-    print(f"Request Form: {request.form}")
-    print(f"Request Args: {request.args}")
-    print(f"Session Data: {dict(session)}")
-    
-    app.logger.critical(f"Request Method: {request.method}")
-    app.logger.critical(f"Request Form: {request.form}")
-    app.logger.critical(f"Request Args: {request.args}")
-    app.logger.critical(f"Session Data: {dict(session)}")
-
-    # Completely disable CSRF for debugging
-    app.config['WTF_CSRF_ENABLED'] = False
-    app.config['WTF_CSRF_CHECK_DEFAULT'] = False
+    # Re-enable CSRF protection
+    app.config['WTF_CSRF_ENABLED'] = True
+    app.config['WTF_CSRF_CHECK_DEFAULT'] = True
     
     if current_user.is_authenticated:
-        print("User is already authenticated")
-        app.logger.critical("User is already authenticated")
+        app.logger.info("Already authenticated user attempting to access login page")
         return redirect(url_for('dashboard'))
 
     form = LoginForm()
     
-    # Log form details
-    print(f"Form Errors: {form.errors}")
-    print(f"Form Data: {form.data}")
-    app.logger.critical(f"Form Errors: {form.errors}")
-    app.logger.critical(f"Form Data: {form.data}")
-
-    if request.method == 'POST':
-        print("POST REQUEST RECEIVED")
-        app.logger.critical("POST REQUEST RECEIVED")
-        
-        # Manual form validation
-        user_id = request.form.get('user_id')
-        password = request.form.get('password')
-        
-        print(f"Attempting login with User ID: {user_id}")
-        app.logger.critical(f"Attempting login with User ID: {user_id}")
+    if form.validate_on_submit():
+        user_id = form.user_id.data
+        password = form.password.data
+        remember = form.remember.data
         
         try:
-            # Find user manually
+            # Find user by user_id
             user = User.query.filter_by(user_id=user_id).first()
             
-            if user:
-                print(f"User found: {user.username}")
-                app.logger.critical(f"User found: {user.username}")
-                
-                # Check password manually
-                is_valid = user.check_password(password)
-                
-                print(f"Password check result: {is_valid}")
-                app.logger.critical(f"Password check result: {is_valid}")
-                
-                if is_valid:
-                    login_user(user)
-                    print("Login successful")
-                    app.logger.critical("Login successful")
-                    return redirect(url_for('dashboard'))
-                else:
-                    print("Invalid password")
-                    app.logger.critical("Invalid password")
+            if user and user.check_password(password):
+                login_user(user, remember=remember)
+                app.logger.info(f"Successful login for user: {user_id}")
+                flash('Login successful', 'success')
+                return redirect(url_for('dashboard'))
             else:
-                print("User not found")
-                app.logger.critical("User not found")
+                app.logger.warning(f"Failed login attempt for user: {user_id}")
+                flash('Invalid user ID or password', 'error')
         
         except Exception as e:
-            print(f"Login error: {e}")
-            app.logger.critical(f"Login error: {e}", exc_info=True)
+            app.logger.error(f"Login error: {str(e)}", exc_info=True)
+            flash('An unexpected error occurred. Please try again.', 'error')
     
-    # Always log when rendering login template
-    print("Rendering login template")
-    app.logger.critical("Rendering login template")
+    # Log form validation errors
+    if form.errors:
+        app.logger.warning(f"Login form validation errors: {form.errors}")
     
     return render_template('login.html', form=form)
 

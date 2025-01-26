@@ -1508,6 +1508,10 @@ if __name__ == '__main__':
         # Initialize Flask-Migrate
         migrate = Migrate(app, db)
         
+        # Upgrade database to the latest migration
+        from flask_migrate import upgrade
+        upgrade()
+        
         # Create all database tables if they don't exist
         db.create_all()
         
@@ -1521,6 +1525,7 @@ if __name__ == '__main__':
                 username='systemadmin',
                 full_name='System Administrator',
                 email='admin@obotan.com',
+                phone_number='+233000000000',  # Add a phone number
                 role='admin',
                 is_active=True,
                 password_hash=generate_password_hash('Obotan2024!Admin')

@@ -1068,52 +1068,21 @@ def reset_password(token):
     return render_template('reset_password.html', nonce=session.get('nonce'))
 
 @app.route('/register', methods=['GET', 'POST'])
-@role_required(['admin', 'manager'])  # Only admin and manager can create new users
 def register():
-    if current_user.is_authenticated and current_user.role not in ['admin', 'manager']:
-        flash('You do not have permission to access this page.', 'error')
+    if current_user.is_authenticated:
+        flash('You are already logged in.', 'info')
         return redirect(url_for('dashboard'))
 
     if request.method == 'POST':
         try:
-            # Create initial admin user if no admin exists
-            existing_admin = User.query.filter_by(role='admin').first()
-            if not existing_admin:
-                username = 'admin'
-                email = 'admin@obotan.com'
-                password = 'Obotan2024!'  # Strong initial password
-                full_name = 'System Administrator'
-                phone_number = '0000000000'
-                role = 'admin'
-
-                # Generate unique user ID
-                user_id = User.generate_user_id(role)
-
-                # Create new admin user
-                new_user = User(
-                    user_id=user_id,
-                    username=username,
-                    email=email,
-                    full_name=full_name,
-                    phone_number=phone_number,
-                    role=role,
-                    is_active=True
-                )
-                new_user.set_password(password)
-                
-                db.session.add(new_user)
-                db.session.commit()
-                
-                flash(f'Initial admin user created. User ID: {user_id}, Password: Obotan2024!', 'success')
-                return redirect(url_for('login'))
-            
-            # Existing registration logic
             username = request.form.get('username')
             email = request.form.get('email')
             password = request.form.get('password')
             full_name = request.form.get('full_name')
             phone = request.form.get('phone')
-            role = request.form.get('role')
+            
+            # Default to 'user' role for public registration
+            role = 'user'
 
             if User.query.filter_by(username=username).first():
                 flash('Username already exists.', 'error')
@@ -1140,8 +1109,8 @@ def register():
             db.session.add(new_user)
             db.session.commit()
 
-            flash('User account has been created successfully!', 'success')
-            return redirect(url_for('manage_users'))
+            flash('Your account has been created successfully! Please log in.', 'success')
+            return redirect(url_for('login'))
 
         except Exception as e:
             db.session.rollback()

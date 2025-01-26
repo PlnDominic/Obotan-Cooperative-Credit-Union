@@ -104,6 +104,20 @@
         min-width: 300px;
         z-index: 1000;
     }
+    .form-links {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 15px;
+    }
+    .form-links a {
+        color: #330000;
+        text-decoration: none;
+        transition: color 0.3s ease;
+    }
+    .form-links a:hover {
+        color: #4a0000;
+        text-decoration: underline;
+    }
 </style>
 
 <div class="container">
@@ -141,8 +155,9 @@
                         </div>
                         <button type="submit" class="btn btn-primary">Login</button>
                     </form>
-                    <div class="text-center mt-3">
+                    <div class="form-links">
                         <a href="{{ url_for('forgot_password') }}">Forgot Password?</a>
+                        <a href="{{ url_for('register') }}">Register New Account</a>
                     </div>
                 </div>
             </div>

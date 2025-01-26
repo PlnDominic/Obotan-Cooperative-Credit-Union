@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Account</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <img src="{{ url_for('static', filename='images/logo.jpg') }}" alt="Logo" class="logo">
+        <h1>Create Account</h1>
+        <form method="POST">
+            <label for="username">Username:</label>
+            <input type="text" name="username" required>
+            
+            <label for="email">Email:</label>
+            <input type="email" name="email" required>
+
+            <label for="phone_number">Phone Number:</label>
+            <input type="text" name="phone_number" required pattern="^\+233[0-9]{9}$" placeholder="+233XXXXXXXXX">
+
+            <label for="password">Password:</label>
+            <input type="password" name="password" required>
+            
+            <label for="role">Role:</label>
+            <select id="role" name="role" required>
+                <option value="admin">Admin</option>
+                <option value="staff">Staff</option>
+            </select>
+            
+            <button type="submit">Create Account</button>
+        </form>
+
+        <p >Already have an account? <a id="log" href="{{ url_for('login') }}">Login</a></p>
+
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <ul>
+                {% for message in messages %}
+                    <li>{{ message }}</li>
+                {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %}
+    </div>
+</body>
+</html>

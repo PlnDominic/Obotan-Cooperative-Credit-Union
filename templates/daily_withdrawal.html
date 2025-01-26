@@ -1,0 +1,317 @@
+{% extends "base.html" %}
+
+{% block title %}Daily Withdrawal - Obotan Co-operative Credit Union Ltd{% endblock %}
+
+{% block head %}
+<style>
+    * {
+        font-size: 12px !important;
+    }
+    .form-content {
+        padding: 20px;
+    }
+    .card {
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+    }
+    .card-header {
+        background-color: #330000;
+        color: white;
+        padding: 12px 20px;
+        border-top-left-radius: 8px;
+        border-top-right-radius: 8px;
+    }
+    .card-header h5 {
+        margin: 0;
+        font-weight: 500;
+        font-size: 12px !important;
+    }
+    .card-body {
+        padding: 20px;
+        background-color: white;
+    }
+    .form-label {
+        font-weight: 500;
+        margin-bottom: 4px;
+        color: #444;
+        font-size: 12px !important;
+    }
+    .form-control, .form-select {
+        padding: 6px 12px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        height: 32px;
+        font-size: 12px !important;
+    }
+    select.form-select {
+        font-size: 12px !important;
+    }
+    select.form-select option {
+        font-size: 12px !important;
+    }
+    .form-control:focus, .form-select:focus {
+        border-color: #330000;
+        box-shadow: 0 0 0 0.2rem rgba(51, 0, 0, 0.25);
+    }
+    .btn-submit {
+        background-color: #330000;
+        border-color: #330000;
+        padding: 8px 20px;
+        color: white;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+    .btn-submit:hover {
+        background-color: #4d0000;
+        border-color: #4d0000;
+    }
+    .section-title {
+        color: #330000;
+        margin-bottom: 15px;
+        font-weight: 500;
+    }
+    .balance-display {
+        background-color: #f8f9fa;
+        padding: 8px;
+        border-radius: 4px;
+        margin-top: 4px;
+    }
+    .total-amount {
+        font-weight: 600;
+        color: #330000;
+        text-align: right;
+        padding: 10px;
+        background-color: #f8f9fa;
+        border-radius: 4px;
+        margin-top: 20px;
+    }
+    .table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+    .table th, .table td {
+        border: 1px solid #ddd;
+        padding: 10px;
+        text-align: left;
+    }
+    .table th {
+        background-color: #330000;
+        color: white;
+    }
+    .table tbody tr:nth-child(even) {
+        background-color: #f9f9f9;
+    }
+    .dashboard-header h4 {
+        font-size: 12px !important;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid" style="margin-top: 70px;">
+    <div class="row page-titles">
+        <div class="col-sm-12 p-md-0">
+            <div class="dashboard-header">
+                <h4 class="black-text" style="font-size: 12px !important;">
+                    <i class="fas fa-money-bill-wave icon-spacing"></i> Daily Withdrawal
+                </h4>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-content">
+        <form method="POST" action="{{ url_for('daily_withdrawal') }}" class="needs-validation" novalidate>
+            {{ form.csrf_token }}
+            
+            <!-- Member Information Card -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 style="font-size: 12px !important;"><i class="fas fa-user me-2"></i>Member Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label class="form-label">Account Number</label>
+                                <input type="text" id="accountNo" name="accountNo" class="form-control" required>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label class="form-label">Date</label>
+                                <input type="date" id="date" name="date" class="form-control" value="{{ today.strftime('%Y-%m-%d') }}" required style="font-size: 12px !important;">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label class="form-label">Reference</label>
+                                <input type="text" id="reference" name="reference" class="form-control" required>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label class="form-label">Account Holder</label>
+                                <input type="text" id="accountHolderInput" class="form-control" readonly>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Withdrawal Information Card -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 style="font-size: 12px !important;"><i class="fas fa-money-bill-wave me-2"></i>Withdrawal Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">Share Code</label>
+                                <select id="shareCode" name="shareCode" class="form-select" style="font-size: 12px !important;">
+                                    <option value="D6" style="font-size: 12px !important;">D6</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">Saving Code</label>
+                                <select id="savingCode" name="savingCode" class="form-select" style="font-size: 12px !important;">
+                                    <option value="H5" style="font-size: 12px !important;">H5</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">Withdrawal Mode</label>
+                                <select id="withdrawalMode" name="withdrawalMode" class="form-select" required style="font-size: 12px !important;">
+                                    <option value="" style="font-size: 12px !important;">Select Mode</option>
+                                    <option value="cash" style="font-size: 12px !important;">Cash</option>
+                                    <option value="cheque" style="font-size: 12px !important;">Cheque</option>
+                                    <option value="mobile_money" style="font-size: 12px !important;">Mobile Money</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">Payment Amount</label>
+                                <input type="number" id="payment" name="payment" class="form-control" step="0.01" required>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">Cash Book</label>
+                                <select id="cashBook" name="cashBook" class="form-select" required style="font-size: 12px !important;">
+                                    <option value="" style="font-size: 12px !important;">Select Cash Book</option>
+                                    <option value="cash" style="font-size: 12px !important;">Cash</option>
+                                    <option value="bank" style="font-size: 12px !important;">Bank</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">Detail/Narration</label>
+                                <input type="text" id="detailNarration" name="detailNarration" class="form-control" required>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Account Details Table -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 style="font-size: 12px !important;"><i class="fas fa-info-circle me-2"></i>Account Details</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Account Holder</th>
+                                    <th>Mobile No</th>
+                                    <th>Account Number</th>
+                                    <th>Share Balance</th>
+                                    <th>Savings Balance</th>
+                                    <th>Total Withdrawal</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td id="accountHolder">-</td>
+                                    <td id="mobileNo">-</td>
+                                    <td id="organization">-</td>
+                                    <td id="shareBalance">0.00</td>
+                                    <td id="savingsBalance">0.00</td>
+                                    <td id="totalWithdrawal">0.00</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="total-amount">
+                        <p>Total Withdrawal Amount Including Charges: <span id="totalAmount">0.00</span></p>
+                    </div>
+
+                    <div class="text-end mt-4">
+                        <button type="submit" class="btn-submit">
+                            <i class="fas fa-check me-2"></i>Process Withdrawal
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.getElementById('accountNo').addEventListener('change', function() {
+    const accountNo = this.value;
+    if (accountNo) {
+        fetch(`/api/get_customer_details/${accountNo}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const customer = data.customer;
+                    document.getElementById('mobileNo').textContent = customer.phone_number || '-';
+                    document.getElementById('accountHolder').textContent = customer.account_holder || '-';
+                    document.getElementById('organization').textContent = customer.account_number || '-';
+                    document.getElementById('shareBalance').textContent = customer.share_balance.toFixed(2);
+                    document.getElementById('savingsBalance').textContent = customer.savings_balance.toFixed(2);
+                    document.getElementById('accountHolderInput').value = customer.account_holder || '-';
+                    
+                    // Update withdrawal amount when payment changes
+                    updateTotalWithdrawal();
+                }
+            })
+            .catch(error => console.error('Error:', error));
+    }
+});
+
+document.getElementById('payment').addEventListener('input', updateTotalWithdrawal);
+
+function updateTotalWithdrawal() {
+    const payment = parseFloat(document.getElementById('payment').value) || 0;
+    const charges = 0; // Add logic for charges if needed
+    const total = payment + charges;
+    
+    document.getElementById('totalWithdrawal').textContent = payment.toFixed(2);
+    document.getElementById('totalAmount').textContent = total.toFixed(2);
+}
+
+// Format currency for all amount fields
+function formatCurrency(number) {
+    return new Intl.NumberFormat('en-GH', {
+        style: 'currency',
+        currency: 'GHS'
+    }).format(number);
+}
+</script>
+{% endblock %}

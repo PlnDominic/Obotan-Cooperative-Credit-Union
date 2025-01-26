@@ -1,0 +1,435 @@
+{% extends "base.html" %}
+{% block content %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>Daily Deposit - Obotan Credit Union</title>
+</head>
+
+<style>
+    .form-content {
+        font-size: 12px;
+        padding: 20px;
+    }
+    .card {
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+    }
+    .card-header {
+        background-color: #330000;
+        color: white;
+        padding: 12px 20px;
+        border-top-left-radius: 8px;
+        border-top-right-radius: 8px;
+    }
+    .card-header h5 {
+        font-size: 14px;
+        margin: 0;
+        font-weight: 500;
+    }
+    .card-body {
+        padding: 20px;
+        background-color: white;
+    }
+    .form-label {
+        font-size: 12px;
+        font-weight: 500;
+        margin-bottom: 4px;
+        color: #444;
+    }
+    .form-control, .form-select {
+        font-size: 12px;
+        padding: 6px 12px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        height: 32px;
+    }
+    .form-control:focus, .form-select:focus {
+        border-color: #330000;
+        box-shadow: 0 0 0 0.2rem rgba(51, 0, 0, 0.25);
+    }
+    .btn-primary {
+        background-color: #330000;
+        border-color: #330000;
+        font-size: 12px;
+        padding: 6px 16px;
+    }
+    .btn-primary:hover {
+        background-color: #4d0000;
+        border-color: #4d0000;
+    }
+    .section-title {
+        font-size: 14px;
+        color: #330000;
+        margin-bottom: 15px;
+        font-weight: 500;
+    }
+    .balance-display {
+        background-color: #f8f9fa;
+        padding: 8px;
+        border-radius: 4px;
+        margin-top: 4px;
+    }
+    .total-amount {
+        font-size: 16px;
+        font-weight: 600;
+        color: #330000;
+        text-align: right;
+        padding: 10px;
+        background-color: #f8f9fa;
+        border-radius: 4px;
+        margin-top: 20px;
+    }
+    .side {
+        padding: 20px !important;
+        width: 250px !important;
+        height: calc(100vh - 40px);
+        background-color: #330000;
+        position: fixed;
+        left: 0;
+        top: 40px;
+        z-index: 100;
+    }
+    .list-group {
+        background: transparent !important;
+        border: none !important;
+    }
+    .list-group-item {
+        border: none !important;
+        padding: 0.5rem 1rem !important;
+        background: transparent !important;
+        color: #fff !important;
+        text-decoration: none !important;
+        cursor: pointer !important;
+        transition: all 0.3s ease !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 10px !important;
+        position: relative !important;
+        z-index: 200 !important;
+        margin-bottom: 5px !important;
+    }
+    .list-group-item:hover {
+        background: rgba(255, 255, 255, 0.1) !important;
+        transform: translateX(5px);
+    }
+    .list-group-item.active {
+        background: rgba(255, 255, 255, 0.2) !important;
+        border-left: 4px solid #fff !important;
+    }
+    .list-group-item i {
+        width: 20px !important;
+        text-align: center !important;
+    }
+</style>
+
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-2 side">
+            <div class="list-group">
+                <a href="{{ url_for('dashboard') }}" class="list-group-item list-group-item-action">
+                    <i class="fas fa-home me-2"></i> Dashboard
+                </a>
+                <a href="{{ url_for('daily_deposit') }}" class="list-group-item list-group-item-action active">
+                    <i class="fas fa-money-bill-wave me-2"></i> Daily Deposit
+                </a>
+                <a href="{{ url_for('daily_withdrawal') }}" class="list-group-item list-group-item-action">
+                    <i class="fas fa-money-bill-wave-alt me-2"></i> Daily Withdrawal
+                </a>
+                <a href="{{ url_for('submit_work') }}" class="list-group-item list-group-item-action">
+                    <i class="fas fa-cash-register me-2"></i> Daily Transaction
+                </a>
+                <a href="{{ url_for('create_customer') }}" class="list-group-item list-group-item-action">
+                    <i class="fas fa-user-plus me-2"></i> New Account
+                </a>
+                <a href="{{ url_for('view_customers') }}" class="list-group-item list-group-item-action">
+                    <i class="fas fa-users me-2"></i> View Customers
+                </a>
+                {% if current_user.role == 'admin' or current_user.role == 'manager' %}
+                <a href="{{ url_for('admin_dashboard') }}" class="list-group-item list-group-item-action">
+                    <i class="fas fa-users-cog me-2"></i> User Management
+                </a>
+                {% endif %}
+                <a href="{{ url_for('settings') }}" class="list-group-item list-group-item-action">
+                    <i class="fas fa-cog me-2"></i> Settings
+                </a>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-10 main">
+            <div class="form-content">
+                <form method="POST" action="{{ url_for('daily_deposit') }}" class="needs-validation" novalidate>
+                    {{ form.csrf_token }}
+                    {{ form.hidden_tag() }}
+                    
+                    <!-- Member Information Card -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i class="fas fa-user me-2"></i>Member Information</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <div class="mb-3">
+                                        <label class="form-label">Account Number</label>
+                                        {{ form.member_id(class="form-control", id="member_id", placeholder="Enter Account Number", onkeypress="handleAccountNumberKeyPress(event)") }}
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="mb-3">
+                                        <label class="form-label">Member Name</label>
+                                        {{ form.member_name(class="form-control", id="member_name", readonly=true) }}
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="mb-3">
+                                        <label class="form-label">Phone Number</label>
+                                        {{ form.phone(class="form-control", id="phone", readonly=true) }}
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="mb-3">
+                                        <label class="form-label">Transaction Date</label>
+                                        {{ form.transaction_date(class="form-control", type="date", value=today.strftime('%Y-%m-%d')) }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Deposit Information Card -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i class="fas fa-money-bill-wave me-2"></i>Deposit Information</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <!-- Share Account -->
+                                <div class="col-md-4">
+                                    <div class="section-title">Share Account</div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Share Code</label>
+                                        {{ form.share_code(class="form-control", id="share_code") }}
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Share Deposit</label>
+                                        {{ form.share_deposit(class="form-control", id="share_deposit", type="number", step="0.01") }}
+                                    </div>
+                                    <div class="balance-display" data-field="share_balance">
+                                        <label class="form-label">Share Balance</label>
+                                        {{ form.share_balance(class="form-control", id="share_balance", readonly=true) }}
+                                    </div>
+                                </div>
+
+                                <!-- Savings Account -->
+                                <div class="col-md-4">
+                                    <div class="section-title">Savings Account</div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Savings Code</label>
+                                        {{ form.savings_code(class="form-control", id="savings_code") }}
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Savings Deposit</label>
+                                        {{ form.savings_deposit(class="form-control", id="savings_deposit", type="number", step="0.01") }}
+                                    </div>
+                                    <div class="balance-display" data-field="savings_balance">
+                                        <label class="form-label">Savings Balance</label>
+                                        {{ form.savings_balance(class="form-control", id="savings_balance", readonly=true) }}
+                                    </div>
+                                </div>
+
+                                <!-- Loan Account -->
+                                <div class="col-md-4">
+                                    <div class="section-title">Loan Account</div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Loan Code</label>
+                                        {{ form.loan_code(class="form-control", id="loan_code") }}
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Principal</label>
+                                        {{ form.principal(class="form-control", id="principal", type="number", step="0.01") }}
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Interest</label>
+                                        {{ form.interest(class="form-control", id="interest", type="number", step="0.01") }}
+                                    </div>
+                                    <div class="balance-display" data-field="loan_balance">
+                                        <label class="form-label">Loan Balance</label>
+                                        {{ form.loan_balance(class="form-control", id="loan_balance", readonly=true) }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Payment Information Card -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i class="fas fa-credit-card me-2"></i>Payment Information</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label class="form-label">Payment Type</label>
+                                        {{ form.payment_type(class="form-select", id="payment_type") }}
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label class="form-label">Payee Name</label>
+                                        {{ form.payee_name(class="form-control", id="payee_name") }}
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label class="form-label">Cheque Number</label>
+                                        {{ form.cheque_number(class="form-control", id="cheque_number") }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label class="form-label">Cashbook</label>
+                                        {{ form.cashbook(class="form-select", id="cashbook") }}
+                                    </div>
+                                </div>
+                                <div class="col-md-8">
+                                    <div class="mb-3">
+                                        <label class="form-label">Detail Narration</label>
+                                        {{ form.detail_narration(class="form-control", id="detail_narration", rows="2") }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="total-amount">
+                                Total Amount: GHS <span id="totalAmount">0.00</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="text-end mt-3">
+                        <button type="button" class="btn btn-secondary me-2" onclick="clearForm()">Clear</button>
+                        <button type="submit" class="btn btn-primary">Save Deposit</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Function to format number as currency
+    function formatCurrency(number) {
+        return parseFloat(number).toFixed(2);
+    }
+
+    // Function to calculate total amount
+    function calculateTotal() {
+        const shareDeposit = parseFloat(document.getElementById('share_deposit').value) || 0;
+        const savingsDeposit = parseFloat(document.getElementById('savings_deposit').value) || 0;
+        const principal = parseFloat(document.getElementById('principal').value) || 0;
+        const interest = parseFloat(document.getElementById('interest').value) || 0;
+        
+        const total = shareDeposit + savingsDeposit + principal + interest;
+        document.getElementById('totalAmount').textContent = formatCurrency(total);
+    }
+
+    // Function to clear form
+    function clearForm() {
+        document.querySelector('form').reset();
+        document.getElementById('totalAmount').textContent = '0.00';
+    }
+
+    // Function to handle account number key press
+    function handleAccountNumberKeyPress(event) {
+        if (event.key === 'Enter') {
+            event.preventDefault(); // Prevent form submission
+            fetchCustomerDetails();
+        }
+    }
+
+    // Function to fetch customer details
+    function fetchCustomerDetails() {
+        const accountNumber = document.getElementById('member_id').value;
+        if (!accountNumber) return;
+
+        fetch(`/api/daily-deposit/customer/${accountNumber}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            credentials: 'same-origin'
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Customer not found');
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Populate form fields with customer data
+                document.getElementById('member_name').value = data.full_name || '';
+                document.getElementById('phone').value = data.phone_number || '';
+                
+                // Set balance fields
+                document.getElementById('share_balance').value = data.share_balance || '0.00';
+                document.getElementById('savings_balance').value = data.savings_balance || '0.00';
+                document.getElementById('loan_balance').value = data.loan_balance || '0.00';
+                
+                // Format and display balances
+                document.querySelectorAll('.balance-display').forEach(display => {
+                    const field = display.getAttribute('data-field');
+                    if (field) {
+                        const value = data[field] || 0;
+                        const input = display.querySelector('input');
+                        if (input) {
+                            input.value = formatCurrency(value);
+                        }
+                    }
+                });
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Customer not found. Please check the account number.');
+                
+                // Clear form fields on error
+                document.getElementById('member_name').value = '';
+                document.getElementById('phone').value = '';
+                document.getElementById('share_balance').value = '0.00';
+                document.getElementById('savings_balance').value = '0.00';
+                document.getElementById('loan_balance').value = '0.00';
+                
+                document.querySelectorAll('.balance-display input').forEach(input => {
+                    input.value = formatCurrency(0);
+                });
+            });
+    }
+
+    // Add event listeners
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add input event listeners for amount calculation
+        ['share_deposit', 'savings_deposit', 'principal', 'interest'].forEach(id => {
+            document.getElementById(id).addEventListener('input', calculateTotal);
+        });
+
+        // Add event listener for payment type change
+        document.getElementById('payment_type').addEventListener('change', function() {
+            const chequeFields = document.getElementById('cheque_number').closest('.mb-3');
+            if (this.value === 'cheque') {
+                chequeFields.style.display = 'block';
+            } else {
+                chequeFields.style.display = 'none';
+            }
+        });
+
+        // Initialize form
+        calculateTotal();
+        document.getElementById('payment_type').dispatchEvent(new Event('change'));
+    });
+</script>
+{% endblock %}

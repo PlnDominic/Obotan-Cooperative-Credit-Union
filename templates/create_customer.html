@@ -1,0 +1,192 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    .list-group-item {
+        background: transparent !important;
+        font-size: 12px;
+    }
+    .form-label, .form-control, .form-select, .text-muted, .btn {
+        font-size: 12px !important;
+    }
+    h6 {
+        font-size: 12px !important;
+    }
+    h5 {
+        font-size: 12px !important;
+    }
+</style>
+
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="side">
+            <nav class="nav flex-column">
+                <div class="list-group">
+                    <a href="{{ url_for('dashboard') }}" class="list-group-item list-group-item-action">
+                        <i class="fas fa-home me-2"></i> Dashboard
+                    </a>
+                    <a href="{{ url_for('daily_deposit') }}" class="list-group-item list-group-item-action">
+                        <i class="fas fa-money-bill-wave me-2"></i> Daily Deposit
+                    </a>
+                    <a href="{{ url_for('submit_work') }}" class="list-group-item list-group-item-action">
+                        <i class="fas fa-cash-register me-2"></i> Daily Transaction
+                    </a>
+                    <a class="list-group-item list-group-item-action active" href="{{ url_for('create_customer') }}">
+                        <i class="fas fa-user-plus me-2"></i> Create Account
+                    </a>
+                    <a href="{{ url_for('view_customers') }}" class="list-group-item list-group-item-action">
+                        <i class="fas fa-users me-2"></i> View Customers
+                    </a>
+                    <a href="{{ url_for('logout') }}" class="list-group-item list-group-item-action">
+                        <i class="fas fa-sign-out-alt me-2"></i> Logout
+                    </a>
+                </div>
+            </nav>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main">
+            <div class="container">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Create New Customer Account</h5>
+                    </div>
+                    <div class="card-body">
+                        <form method="POST" action="{{ url_for('create_customer') }}" enctype="multipart/form-data">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            {{ form.hidden_tag() }}
+                            <!-- Personal Information -->
+                            <h6 class="mb-3">Personal Information</h6>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Full Name</label>
+                                    <input type="text" class="form-control" name="full_name" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Email</label>
+                                    <input type="email" class="form-control" name="email">
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Phone Number</label>
+                                    <input type="tel" class="form-control" name="phone_number" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Date of Birth</label>
+                                    <input type="date" class="form-control" name="date_of_birth" required>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">Gender</label>
+                                    <select class="form-select" name="gender" required>
+                                        <option value="">Select Gender</option>
+                                        <option value="Male">Male</option>
+                                        <option value="Female">Female</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">Marital Status</label>
+                                    <select class="form-select" name="marital_status" required>
+                                        <option value="">Select Marital Status</option>
+                                        <option value="Single">Single</option>
+                                        <option value="Married">Married</option>
+                                        <option value="Divorced">Divorced</option>
+                                        <option value="Widowed">Widowed</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">Occupation</label>
+                                    <input type="text" class="form-control" name="occupation" required>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Residential Address</label>
+                                <textarea class="form-control" name="residential_address" rows="2" required></textarea>
+                            </div>
+
+                            <!-- Identification Section -->
+                            <h6 class="mb-3 mt-4">Identification</h6>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">ID Type</label>
+                                    <select class="form-select" name="id_type" required>
+                                        <option value="">Select ID Type</option>
+                                        <option value="Ghana Card">Ghana Card</option>
+                                        <option value="Voter's ID">Voter's ID</option>
+                                        <option value="Passport">Passport</option>
+                                        <option value="Driver's License">Driver's License</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">ID Number</label>
+                                    <input type="text" class="form-control" name="id_number" required>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">Passport Photo</label>
+                                    <input type="file" class="form-control" name="passport_photo" accept="image/*" required>
+                                    <small class="text-muted">Recent passport-sized photograph</small>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">ID Front Photo</label>
+                                    <input type="file" class="form-control" name="id_front_photo" accept="image/*" required>
+                                    <small class="text-muted">Front side of ID card</small>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">ID Back Photo</label>
+                                    <input type="file" class="form-control" name="id_back_photo" accept="image/*" required>
+                                    <small class="text-muted">Back side of ID card</small>
+                                </div>
+                            </div>
+
+                            <!-- Next of Kin -->
+                            <h6 class="mb-3 mt-4">Next of Kin Information</h6>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Next of Kin</label>
+                                    <input type="text" class="form-control" name="next_of_kin" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Next of Kin Phone</label>
+                                    <input type="tel" class="form-control" name="next_of_kin_phone" required>
+                                </div>
+                            </div>
+
+                            <!-- Account Information -->
+                            <h6 class="mb-3 mt-4">Account Information</h6>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Account Type</label>
+                                    <select class="form-select" name="account_type" required>
+                                        <option value="">Select Account Type</option>
+                                        <option value="Savings">Savings Account</option>
+                                        <option value="Current">Current Account</option>
+                                        <option value="Fixed Deposit">Fixed Deposit</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Initial Deposit (₵)</label>
+                                    <input type="number" class="form-control" name="initial_deposit" step="0.01" min="0" required>
+                                </div>
+                            </div>
+
+                            <div class="text-end">
+                                <button type="submit" class="btn btn-primary">Create Account</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

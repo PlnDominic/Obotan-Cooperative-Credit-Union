@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Submit Transaction - Obotan</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            color: #000000;
+            font-size: 12px;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .navbar {
+            background: linear-gradient(45deg, white, rgb(0, 75, 80)) !important;
+            height: 40px;
+            padding: 0 !important;
+        }
+        
+        .navbar-brand {
+            color: #ffffff !important;
+            font-size: 16px;
+            padding-left: 20px;
+        }
+        
+        .side {
+            width: 250px;
+            background-color: #330000;
+            color: #ffffff;
+            padding: 10px;
+            height: calc(100vh - 40px);
+            position: fixed;
+            top: 20px;
+            left: 0;
+            overflow-y: auto;
+        }
+        
+        .main {
+            margin-left: 250px;
+            color: #000000;
+            padding: 5px !important;
+            padding-top: 20px !important;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg fixed-top">
+        <div class="container-fluid">
+            <img src="{{ url_for('static', filename='images/logo.jpg') }}" alt="Logo" class="navbar-logo"> 
+            <span class="navbar-brand">Obotan Co-operative Credit Union Ltd</span>
+        </div>
+    </nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+                <div class="list-group">
+                    <a href="{{ url_for('dashboard') }}" class="list-group-item list-group-item-action">
+                        <i class="fas fa-home me-2"></i> Dashboard
+                    </a>
+                    <a href="{{ url_for('submit_work') }}" class="list-group-item list-group-item-action active">
+                        <i class="fas fa-money-bill-wave me-2"></i> Submit Transaction
+                    </a>
+                    {% if current_user.has_role('admin') %}
+                    <a href="{{ url_for('manage_users') }}" class="list-group-item list-group-item-action">
+                        <i class="fas fa-users me-2"></i> Manage Users
+                    </a>
+                    {% endif %}
+                    <a href="{{ url_for('logout') }}" class="list-group-item list-group-item-action">
+                        <i class="fas fa-sign-out-alt me-2"></i> Logout
+                    </a>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-md-10 main">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h4 class="mb-0">
+                                    <i class="fas fa-money-bill-wave me-2"></i> New Transaction Entry
+                                </h4>
+                                <span class="text-white">
+                                    <i class="fas fa-user me-2"></i> {{ current_user.username }}
+                                </span>
+                            </div>
+                            <div class="card-body">
+                                <form method="POST" class="row g-3" id="transactionForm">
+                                    {{ form.csrf_token }}
+
+                                    <!-- Member Information Section -->
+                                    <div class="col-12 mb-4">
+                                        <h5 class="border-bottom pb-2 mb-3">
+                                            <i class="fas fa-user me-2"></i> Member Information
+                                        </h5>
+                                        <div class="row g-3">
+                                            <div class="col-md-4">
+                                                <label class="form-label">Name</label>
+                                                <input type="text" name="name" class="form-control" required>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label class="form-label">Account Number</label>
+                                                <input type="text" name="account_number" class="form-control" required>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label class="form-label">Mobile</label>
+                                                <input type="text" name="mobile" class="form-control" required>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Deposits Section -->
+                                    <div class="col-12 mb-4">
+                                        <h5 class="border-bottom pb-2 mb-3">
+                                            <i class="fas fa-piggy-bank me-2"></i> Deposits
+                                        </h5>
+                                        <div class="row g-3">
+                                            <!-- Share Account -->
+                                            <div class="col-md-4">
+                                                <div class="card">
+                                                    <div class="card-body">
+                                                        <h6 class="card-title">Share Account</h6>
+                                                        <div class="mb-3">
+                                                            <label class="form-label">Share Code</label>
+                                                            <input type="text" name="share_code" class="form-control" required>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label class="form-label">Share Deposit</label>
+                                                            <input type="number" name="share_deposit" id="share_deposit" class="form-control amount-field" required>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label class="form-label">Share Balance</label>
+                                                            <input type="number" name="share_balance" class="form-control" required>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Savings Account -->
+                                            <div class="col-md-4">
+                                                <div class="card">
+                                                    <div class="card-body">
+                                                        <h6 class="card-title">Savings Account</h6>
+                                                        <div class="mb-3">
+                                                            <label class="form-label">Savings Code</label>
+                                                            <input type="text" name="savings_code" class="form-control" required>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label class="form-label">Savings Deposit</label>
+                                                            <input type="number" name="savings_deposit" id="savings_deposit" class="form-control amount-field" required>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label class="form-label">Savings Balance</label>
+                                                            <input type="number" name="savings_balance" class="form-control" required>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Loan Account -->
+                                            <div class="col-md-4">
+                                                <div class="card">
+                                                    <div class="card-body">
+                                                        <h6 class="card-title">Loan Account</h6>
+                                                        <div class="mb-3">
+                                                            <label class="form-label">Loan Code</label>
+                                                            <input type="text" name="loan_code" class="form-control" required>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label class="form-label">Principal</label>
+                                                            <input type="number" name="principal" id="principal" class="form-control amount-field" required>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label class="form-label">Interest</label>
+                                                            <input type="number" name="interest" id="interest" class="form-control amount-field" required>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label class="form-label">Loan Balance</label>
+                                                            <input type="number" name="loan_balance" class="form-control" required>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Withdrawal Section -->
+                                    <div class="col-12 mb-4">
+                                        <h5 class="border-bottom pb-2 mb-3">
+                                            <i class="fas fa-money-bill-wave me-2"></i> Withdrawal
+                                        </h5>
+                                        <div class="row g-3">
+                                            <div class="col-md-6">
+                                                <div class="card">
+                                                    <div class="card-body">
+                                                        <h6 class="card-title">Share Withdrawal</h6>
+                                                        <div class="mb-3">
+                                                            <label class="form-label">Share Code</label>
+                                                            <input type="text" name="share_withdrawal_code" class="form-control">
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label class="form-label">Share Withdrawal Amount</label>
+                                                            <input type="number" name="share_withdrawal" id="share_withdrawal" class="form-control withdrawal-field" step="0.01">
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label class="form-label">Share Balance After Withdrawal</label>
+                                                            <input type="number" name="share_balance_after" id="share_balance_after" class="form-control" readonly>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-6">
+                                                <div class="card">
+                                                    <div class="card-body">
+                                                        <h6 class="card-title">Savings Withdrawal</h6>
+                                                        <div class="mb-3">
+                                                            <label class="form-label">Savings Code</label>
+                                                            <input type="text" name="savings_withdrawal_code" class="form-control">
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label class="form-label">Savings Withdrawal Amount</label>
+                                                            <input type="number" name="savings_withdrawal" id="savings_withdrawal" class="form-control withdrawal-field" step="0.01">
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label class="form-label">Savings Balance After Withdrawal</label>
+                                                            <input type="number" name="savings_balance_after" id="savings_balance_after" class="form-control" readonly>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Withdrawal Details -->
+                                        <div class="row mt-3">
+                                            <div class="col-md-12">
+                                                <div class="card">
+                                                    <div class="card-body">
+                                                        <div class="row">
+                                                            <div class="col-md-6">
+                                                                <div class="mb-3">
+                                                                    <label class="form-label">Payer</label>
+                                                                    <input type="text" name="payer" class="form-control">
+                                                                </div>
+                                                                <div class="mb-3">
+                                                                    <label class="form-label">Mobile Number</label>
+                                                                    <input type="tel" name="payer_mobile" class="form-control">
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <div class="mb-3">
+                                                                    <label class="form-label">Total Withdrawal Amount</label>
+                                                                    <input type="number" name="total_withdrawal" id="total_withdrawal" class="form-control" readonly>
+                                                                </div>
+                                                                <div class="mb-3">
+                                                                    <label class="form-label">Withdrawal Description</label>
+                                                                    <textarea name="withdrawal_description" class="form-control" rows="2"></textarea>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Total Amount -->
+                                    <div class="col-12">
+                                        <div class="card">
+                                            <div class="card-body">
+                                                <div class="row align-items-center">
+                                                    <div class="col-md-6">
+                                                        <h5 class="mb-0">Total Amount</h5>
+                                                    </div>
+                                                    <div class="col-md-6 text-end">
+                                                        <input type="hidden" name="amount" id="total_amount">
+                                                        <h3 class="mb-0" id="total_display">GHS 0.00</h3>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-12 text-end mt-4">
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="fas fa-save me-2"></i> Submit Transaction
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>

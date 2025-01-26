@@ -1,0 +1,407 @@
+/* static/styles.css */
+* {
+    box-sizing: border-box; /* Include padding and border in element's total width and height */
+}
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4da; /* Light grey background */
+    font-size: 12px;
+    color: #ffffff; /* Dark grey text */
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh; /* Full viewport height */
+    overflow: hidden; /* Prevent scrolling */
+}
+
+span.error { color: red; font-size: 0.9em; }
+
+.logo {
+    display: block;
+    margin: 0 auto 20px; /* Center the logo and add some space below */
+    max-width: 100%; /* Responsive logo */
+    height: auto; /* Maintain aspect ratio */
+}
+.container {
+    
+    background-color: rgb(80, 0, 0); /* White background for the form */
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgb(255, 255, 255);
+    padding: 20px;
+    width: auto;
+    width: 260px; /* Fixed width for the form */
+    
+}
+
+.settings-icon {
+    width: 20px; /* Adjust size as needed */
+    height: 20px; /* Adjust size as needed */
+    vertical-align: middle; /* Align icon with text */
+    margin-right: 5px; /* Space between icon and text */
+}
+
+.cont {
+    display: flex;
+    background: linear-gradient(135deg, rgb(80, 0, 0), white ); /* Gradient background */
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 20px;
+    width: 100%; /* Set the width to cover the whole screen */
+    max-width: 100%;
+    margin: 20px auto;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    display: flex;
+    gap: 20px;
+    height: 100%; 
+}
+
+.form-left, .form-right {
+    flex: 1;
+}
+
+.form-left h2, .form-right h2 {
+    font-size: 14px;
+    margin-bottom: 10px;
+    border-bottom: 2px solid #ddd;
+    padding-bottom: 5px;
+}
+
+form label {
+    margin-bottom: 5px;
+    display: block;
+}
+
+form input, form select, form button {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+form button {
+    background-color: #003366;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 20px;
+}
+
+form button:hover {
+    background-color: #0055a5;
+}
+
+.error {
+    color: red;
+    font-size: 12px;
+}
+
+h1 {
+    text-align: center;
+    color: #ffffff; /* Black text for the title */
+    font-size: 14px;
+}
+
+.h {
+    color: #ffffff; /* Medium grey for section titles */
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+    color: #fff5f5; /* Dark grey for labels */
+    font-size: 12px;
+}
+
+input[type="text"],
+input[type="password"],
+input[type="email"],
+input[type="phone_number"],
+select {
+    width: 90%;
+    padding: 8px;
+    height: 6px;
+    font-size: 12px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc; /* Light grey border */
+    border-radius: 4px;
+}
+
+input[type="text"]:focus,
+input[type="password"]:focus,
+input[type="email"]:focus,
+input[type="phone_number"]:focus,
+select:focus {
+    border-color: #ffffff; /* Darker grey on focus */
+    outline: none; /* Remove default outline */
+}
+
+.but{
+    width: 50%;
+    background-color: #000;
+    border: 0px;
+    font-size: 10px;
+}
+
+
+button {
+    display: block; /* Display block to remove extra space around the button */
+    margin: auto; /* Center the button horizontally */
+    align-items: center;
+    width: 50%;
+    padding: 10px;
+    font-size: 12px;
+    background-color: #000; /* Black background for buttons */
+    color: white; /* White text for buttons */
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+
+button:hover {
+    background-color: #00333e; /* Dark grey on hover */
+}
+
+#dont{
+    font-size: 12px;
+}
+
+#role{
+    width: 40%;
+    color: #000;
+}
+
+#log{
+    color:rgb(23, 213, 255);
+}
+
+#Daily{
+    justify-content: left;
+}
+
+/* static/styles.css */
+
+/* ... existing styles ... */
+
+.navbar {
+    position: fixed; /* Fixes the navbar at the top */
+    top: 0; /* Aligns it to the top of the page */
+    left: 0; /* Aligns it to the left of the page */
+    bottom: 20px;
+    width: 100%; /* Full width */
+    background: linear-gradient(135deg, white, rgb(1, 69, 101)); /* Gradient background */
+   
+    border: 2px solid transparent; /* Sets border thickness to 2px and makes it transparent */
+    background-clip: padding-box; /* Ensures the border is outside the padding *//
+    border-image-slice: 1; /* Ensures the gradient covers the entire border */
+    color: #ffffff; /* Text color */
+    transition: color 0.3s ease;
+    font-size: 12px; 
+    
+    z-index: 9999; /* Ensures the navbar stays on top of other elements */
+}
+
+.navbar ul {
+    list-style-type: none; /* Remove bullet points */
+    padding: 0;
+    margin: 0; /* Remove default margin */
+    display: flex; /* Use flexbox for horizontal layout */
+}
+
+.navbar li {
+    margin-right: 20px; /* Space between links */
+}
+
+.navbar a {
+    color: #ffffff; /* Link color */
+    text-decoration: none; /* Remove underline */
+}
+
+.navbar a:hover {
+    text-decoration: underline; /* Underline on hover */
+}
+
+/* Add some margin to the body to prevent content from being hidden behind the navbar */
+body {
+    margin-top: 60px; /* Adjust based on the height of the navbar */
+}
+.navbar-logo{
+    padding-top: 10px;
+    width: 40px; /* Adjusted width to fit perfectly in the navbar */
+    height: 50px; /* Maintain aspect ratio */
+    padding-bottom: 10px;
+    margin-left: 10px;
+    }
+    
+    
+    .navbar-brand{
+    color: #3a0000;
+    font-size:16px;
+    text-align: left;
+    padding-left: 20px;
+    }
+    
+    .navbar-links{
+        color:#ffffff;
+        font-size: 12px;
+        padding: 7px;
+        padding-left: 20px;
+    }
+       
+    .navbar-links a {
+        margin-right: 20px; /* Space between each link */
+        color: #ffffff; /* White color for each link */
+        text-decoration: none; /* Remove underline from links */
+    }
+    
+    .navbar-links a:hover {
+        color: #c30303;
+    }
+    
+    /* Navbar Styles */
+    .navbar {
+        padding: 0px; /* Reduced padding for the navbar */
+        font-size: 14px; /* Decreased font size for navbar items */
+        
+        background-color: rgb(80, 0, 0); /* Background color */
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        height: 40px; /* Fixed height for navbar */
+        z-index: 10; /* Ensures navbar is above the map */
+    }
+
+
+ul {
+    list-style-type: none; /* Remove bullet points */
+    padding: 0;
+}
+
+ul li {
+    color: red; /* Color for flash messages */
+}
+
+.sidebar {
+    width: 250px; /* Set the width of the sidebar */
+    background-color: #330000; /* Background color for the sidebar */
+    color: rgb(255, 255, 255); /* Text color */
+    padding-top: 50px;
+    padding: 20px; /* Padding inside the sidebar */
+    height: 100vh;
+}
+
+.sidebar h2 {
+    margin-top: 0; /* Remove top margin */
+}
+
+.sidebar ul {
+    list-style-type: none; /* Remove bullet points */
+    padding: 0; /* Remove padding */
+}
+
+.sidebar ul li {
+    margin: 10px 0; /* Space between links */
+}
+
+.sidebar ul li a {
+    color: rgb(0, 0, 0); /* Link color */
+    text-decoration: none; /* Remove underline */
+    background-color: #4b0018;
+}
+
+.sidebar ul li a:hover {
+    text-decoration: underline; /* Underline on hover */
+}
+
+.contain {
+            display: flex;
+            height: 100vh;
+    background: linear-gradient(135deg, rgb(80, 0, 0), white ); /* Gradient background */
+
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .side {
+            width: 250px; /* Set the width of the sidebar */
+            background-color: #330000; /* Background color for the sidebar */
+            color: rgb(255, 255, 255); /* Text color */
+            padding-top: 50px;
+            padding: 20px; /* Padding inside the sidebar */
+            height: 100vh;
+        }
+        .side h3 {
+            margin-bottom: 40px;
+        }
+        .side ul {
+            list-style: none;
+            padding: 0;
+        }
+        .side ul li {
+            margin: 20px 0;
+            font-size: 16px;
+        }
+        .main {
+            flex: 1;
+            padding: 20px;
+        }
+        .main-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .main-header .alert {
+            background-color: #ffecb3;
+            padding: 10px 20px;
+            border-radius: 5px;
+        }
+        .dashboard {
+            margin-top: 20px;
+            display: flex;
+        }
+        .client-activities, .calendar {
+            background-color: #fff;
+            color: #000;
+            border-radius: 5px;
+            padding: 20px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .client-activities {
+            flex: 2;
+            margin-right: 20px;
+        }
+        .calendar {
+            flex: 1;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        table th, table td {
+            text-align: left;
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+        .status {
+            padding: 5px 10px;
+            border-radius: 5px;
+            color: #000000;
+            text-align: center;
+        }
+        .status.not-informed {
+            background-color: #e74c3c;
+        }
+        .status.processing {
+            background-color: #f39c12;
+        }
+        .status.in-review {
+            background-color: #3498db;
+        }
+        .status.informed {
+            background-color: #2ecc71;
+        }
+        .status.new-card {
+            background-color: #9b59b6;
+        }

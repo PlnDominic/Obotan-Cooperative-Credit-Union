@@ -1,0 +1,240 @@
+{% extends "base.html" %}
+
+{% block title %}Customer Details - Obotan Co-operative Credit Union Ltd{% endblock %}
+
+{% block content %}
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg fixed-top">
+        <div class="container-fluid">
+            <img src="{{ url_for('static', filename='images/logo.jpg') }}" alt="Logo" class="navbar-logo" style="height: 20px; margin-right: 10px;"> 
+            <span class="navbar-brand">Obotan Co-operative Credit Union Ltd</span>
+        </div>
+    </nav>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="side">
+                <nav class="nav flex-column">
+                    <a class="nav-link" href="{{ url_for('dashboard') }}">
+                        <i class="fas fa-chart-line me-2"></i> Dashboard
+                    </a>
+                    <a class="nav-link" href="{{ url_for('submit_work') }}">
+                        <i class="fas fa-tasks me-2"></i> Daily Transaction
+                    </a>
+                    <a class="nav-link" href="{{ url_for('create_customer') }}">
+                        <i class="fas fa-user-plus me-2"></i> Create Account
+                    </a>
+                    <a class="nav-link active" href="{{ url_for('view_customers') }}">
+                        <i class="fas fa-users me-2"></i> View Customers
+                    </a>
+                    <a class="nav-link" href="{{ url_for('logout') }}">
+                        <i class="fas fa-sign-out-alt me-2"></i> Logout
+                    </a>
+                </nav>
+            </div>
+
+            <!-- Main Content -->
+            <div class="main">
+                <div class="container">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">Customer Details</h5>
+                                <div>
+                                    <a href="{{ url_for('edit_customer', customer_id=customer.id) }}" class="btn btn-warning btn-sm">
+                                        <i class="fas fa-edit me-1"></i> Edit Customer
+                                    </a>
+                                    <a href="{{ url_for('view_customers') }}" class="btn btn-light btn-sm ms-2">
+                                        <i class="fas fa-arrow-left me-1"></i> Back to List
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <!-- Personal Information -->
+                                <div class="col-md-6">
+                                    <h6 class="mb-3">Personal Information</h6>
+                                    <div class="customer-photo-container mb-3">
+                                        {% if customer.passport_photo %}
+                                            <img src="{{ url_for('static', filename=customer.passport_photo) }}" 
+                                                 alt="Passport Photo" 
+                                                 class="customer-photo img-fluid"
+                                                 style="max-width: 200px; height: auto;"
+                                                 onerror="this.onerror=null; this.src='/static/images/default-avatar.png';">
+                                        {% else %}
+                                            <img src="{{ url_for('static', filename='images/default-avatar.png') }}" 
+                                                 alt="No Passport Photo" 
+                                                 class="customer-photo img-fluid"
+                                                 style="max-width: 200px; height: auto;">
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <div class="detail-label">Account Number</div>
+                                        <div class="detail-value">{{ customer.account_number }}</div>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <div class="detail-label">Full Name</div>
+                                        <div class="detail-value">{{ customer.full_name }}</div>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <div class="detail-label">Date of Birth</div>
+                                        <div class="detail-value">{{ customer.date_of_birth.strftime('%Y-%m-%d') }}</div>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <div class="detail-label">Gender</div>
+                                        <div class="detail-value">{{ customer.gender }}</div>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <div class="detail-label">Phone Number</div>
+                                        <div class="detail-value">{{ customer.phone_number }}</div>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <div class="detail-label">Email</div>
+                                        <div class="detail-value">{{ customer.email or 'Not provided' }}</div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Account Information -->
+                                <div class="col-md-6">
+                                    <h6 class="mb-3">Account Information</h6>
+                                    
+                                    <div class="mb-3">
+                                        <div class="detail-label">Account Type</div>
+                                        <div class="detail-value">{{ customer.account_type }}</div>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <div class="detail-label">Initial Deposit</div>
+                                        <div class="detail-value">₵{{ "%.2f"|format(customer.initial_deposit) }}</div>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <div class="detail-label">Account Status</div>
+                                        <div class="detail-value">
+                                            <span class="badge bg-{{ 'success' if customer.status == 'active' else 'danger' }}">
+                                                {{ customer.status }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <div class="detail-label">Created Date</div>
+                                        <div class="detail-value">{{ customer.created_at.strftime('%Y-%m-%d %H:%M') }}</div>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <div class="detail-label">Occupation</div>
+                                        <div class="detail-value">{{ customer.occupation }}</div>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <div class="detail-label">Address</div>
+                                        <div class="detail-value">{{ customer.address }}</div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Next of Kin Information -->
+                                <div class="col-md-6">
+                                    <h6 class="mb-3">Next of Kin Information</h6>
+                                    
+                                    <div class="mb-3">
+                                        <div class="detail-label">Next of Kin</div>
+                                        <div class="detail-value">{{ customer.next_of_kin }}</div>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <div class="detail-label">Next of Kin Phone</div>
+                                        <div class="detail-value">{{ customer.next_of_kin_phone }}</div>
+                                    </div>
+                                </div>
+                                
+                                <!-- ID Information -->
+                                <div class="col-md-6">
+                                    <h6 class="mb-3">Identification Information</h6>
+                                    
+                                    <div class="mb-3">
+                                        <div class="detail-label">ID Type</div>
+                                        <div class="detail-value">{{ customer.id_type }}</div>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <div class="detail-label">ID Number</div>
+                                        <div class="detail-value">{{ customer.id_number }}</div>
+                                    </div>
+                                    
+                                    <div class="id-photos mb-3">
+                                        <div class="row">
+                                            <div class="col-md-6 text-center">
+                                                {% if customer.id_front_photo %}
+                                                    <img src="{{ url_for('static', filename=customer.id_front_photo) }}" 
+                                                         alt="ID Front" 
+                                                         class="id-photo img-fluid mb-2"
+                                                         style="max-width: 300px; height: auto;"
+                                                         onerror="this.onerror=null; this.src='/static/images/default-id.png';">
+                                                {% else %}
+                                                    <img src="{{ url_for('static', filename='images/default-id.png') }}" 
+                                                         alt="No ID Front" 
+                                                         class="id-photo img-fluid mb-2"
+                                                         style="max-width: 300px; height: auto;">
+                                                {% endif %}
+                                                <p class="text-muted">ID Front</p>
+                                            </div>
+                                            <div class="col-md-6 text-center">
+                                                {% if customer.id_back_photo %}
+                                                    <img src="{{ url_for('static', filename=customer.id_back_photo) }}" 
+                                                         alt="ID Back" 
+                                                         class="id-photo img-fluid mb-2"
+                                                         style="max-width: 300px; height: auto;"
+                                                         onerror="this.onerror=null; this.src='/static/images/default-id.png';">
+                                                {% else %}
+                                                    <img src="{{ url_for('static', filename='images/default-id.png') }}" 
+                                                         alt="No ID Back" 
+                                                         class="id-photo img-fluid mb-2"
+                                                         style="max-width: 300px; height: auto;">
+                                                {% endif %}
+                                                <p class="text-muted">ID Back</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Auto-dismiss alerts after 5 seconds
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(function() {
+                var alerts = document.getElementsByClassName('alert');
+                for(var i = 0; i < alerts.length; i++) {
+                    alerts[i].style.display = 'none';
+                }
+            }, 5000);
+        });
+    </script>
+{% endblock %}

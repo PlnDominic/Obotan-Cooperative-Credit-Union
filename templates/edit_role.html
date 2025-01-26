@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Role</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Edit Role</h1>
+        <form method="POST">
+            <label for="name">Role Name:</label>
+            <input type="text" name="name" value="{{ role.name }}" required>
+            <label for="permissions">Permissions (JSON format):</label>
+            <textarea name="permissions">{{ role.permissions }}</textarea>
+            <button type="submit">Update Role</button>
+        </form>
+        <a href="{{ url_for('manage_roles') }}">Back to Manage Roles</a>
+    </div>
+</body>
+</html>

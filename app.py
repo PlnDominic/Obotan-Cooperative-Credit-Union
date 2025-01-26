@@ -1507,109 +1507,27 @@ if __name__ == '__main__':
     with app.app_context():  # Create an application context
         # Initialize Flask-Migrate
         migrate = Migrate(app, db)
-
-        # Import migration
-        from migrations.add_full_name_to_users import upgrade as add_full_name
-
-        # Create tables and run migrations
-        db.create_all()
-        try:
-            add_full_name()
-        except Exception as e:
-            print(f"Migration error (this is normal if the column already exists): {str(e)}")
-
-        # Check if admin user exists
-        admin_user = User.query.filter_by(username='admin').first()
         
-        # Create default roles if they don't exist
-        default_roles = {
-            'bank_teller': {
-                'create': True,
-                'read': True,
-                'update': True,
-                'delete': False,
-                'manage_users': False,
-                'manage_roles': False,
-                'process_transactions': True,
-                'view_customer_info': True,
-                'handle_cash': True
-            },
-            'mobile_banker': {
-                'create': True,
-                'read': True,
-                'update': True,
-                'delete': False,
-                'manage_users': False,
-                'manage_roles': False,
-                'process_transactions': True,
-                'view_customer_info': True,
-                'handle_cash': True,
-                'field_operations': True
-            },
-            'manager': {
-                'create': True,
-                'read': True,
-                'update': True,
-                'delete': True,
-                'manage_users': True,
-                'manage_roles': True,
-                'process_transactions': True,
-                'view_customer_info': True,
-                'handle_cash': True,
-                'approve_transactions': True,
-                'view_reports': True,
-                'manage_staff': True
-            }
-        }
-
-        for role_name, permissions in default_roles.items():
-            role = Role.query.filter_by(name=role_name).first()
-            if not role:
-                new_role = Role(name=role_name, permissions=permissions)
-                db.session.add(new_role)
-                print(f"{role_name} role created with permissions: {permissions}")
-
-        # Create admin role if it doesn't exist
-        admin_role = Role.query.filter_by(name='admin').first()
-        if not admin_role:
-            admin_role = Role(
-                name='admin',
-                permissions={
-                    'create': True,
-                    'read': True,
-                    'update': True,
-                    'delete': True,
-                    'manage_users': True,
-                    'manage_roles': True,
-                    'process_transactions': True,
-                    'view_customer_info': True,
-                    'handle_cash': True,
-                    'approve_transactions': True,
-                    'view_reports': True,
-                    'manage_staff': True,
-                    'system_config': True,
-                    'all': True
-                }
-            )
-            db.session.add(admin_role)
-            print("Admin role created with full permissions")
-
-        # Create admin user if it doesn't exist
-        admin_user = User.query.filter_by(username='admin').first()
-        if not admin_user:
-            admin = User(
-                user_id='ADM' + datetime.now().strftime('%y%m%d%H%M'),
-                username='admin',
-                full_name='System Administrator',  
-                email='admin@obotancredit.com',
-                phone_number='+233000000000',
+        # Create all database tables if they don't exist
+        db.create_all()
+        
+        # Optional: Add a default admin user if not exists
+        from models import User
+        existing_admin = User.query.filter_by(user_id='ADM240226001').first()
+        if not existing_admin:
+            # Create the default admin user
+            admin_user = User(
+                user_id='ADM240226001',
+                username='systemadmin',
+                full_name='System Administrator',
+                email='admin@obotan.com',
                 role='admin',
                 is_active=True,
-                created_at=datetime.utcnow()
+                password_hash=generate_password_hash('Obotan2024!Admin')
             )
-            admin.set_password('admin123')  
-            db.session.add(admin)
+            db.session.add(admin_user)
             db.session.commit()
-            print('Admin user created successfully')
-            
-    app.run(debug=True, host='0.0.0.0', port=5000)
+            print("Default admin user created.")
+        
+        # Run the app
+        app.run(host='0.0.0.0', port=int(os.getenv('PORT', 5000)))

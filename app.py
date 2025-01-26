@@ -350,7 +350,7 @@ def login():
                 login_user(user, remember=remember)
                 app.logger.info(f"Successful login for user: {user_id}")
                 flash('Login successful', 'success')
-                return redirect(url_for('dashboard'))
+                return redirect(url_for('dashboard'))  # Always redirect to dashboard
             else:
                 app.logger.warning(f"Failed login attempt for user: {user_id}")
                 flash('Invalid user ID or password', 'error')
@@ -1068,21 +1068,52 @@ def reset_password(token):
     return render_template('reset_password.html', nonce=session.get('nonce'))
 
 @app.route('/register', methods=['GET', 'POST'])
+@role_required(['admin', 'manager'])  # Only admin and manager can create new users
 def register():
-    if current_user.is_authenticated:
-        flash('You are already logged in.', 'info')
+    if current_user.is_authenticated and current_user.role not in ['admin', 'manager']:
+        flash('You do not have permission to access this page.', 'error')
         return redirect(url_for('dashboard'))
 
     if request.method == 'POST':
         try:
+            # Create initial admin user if no admin exists
+            existing_admin = User.query.filter_by(role='admin').first()
+            if not existing_admin:
+                username = 'admin'
+                email = 'admin@obotan.com'
+                password = 'Obotan2024!'  # Strong initial password
+                full_name = 'System Administrator'
+                phone_number = '0000000000'
+                role = 'admin'
+
+                # Generate unique user ID
+                user_id = User.generate_user_id(role)
+
+                # Create new admin user
+                new_user = User(
+                    user_id=user_id,
+                    username=username,
+                    email=email,
+                    full_name=full_name,
+                    phone_number=phone_number,
+                    role=role,
+                    is_active=True
+                )
+                new_user.set_password(password)
+                
+                db.session.add(new_user)
+                db.session.commit()
+                
+                flash(f'Initial admin user created. User ID: {user_id}, Password: Obotan2024!', 'success')
+                return redirect(url_for('login'))
+            
+            # Existing registration logic
             username = request.form.get('username')
             email = request.form.get('email')
             password = request.form.get('password')
             full_name = request.form.get('full_name')
             phone = request.form.get('phone')
-            
-            # Default to 'user' role for public registration
-            role = 'user'
+            role = request.form.get('role')
 
             if User.query.filter_by(username=username).first():
                 flash('Username already exists.', 'error')
@@ -1109,8 +1140,8 @@ def register():
             db.session.add(new_user)
             db.session.commit()
 
-            flash('Your account has been created successfully! Please log in.', 'success')
-            return redirect(url_for('login'))
+            flash('User account has been created successfully!', 'success')
+            return redirect(url_for('manage_users'))
 
         except Exception as e:
             db.session.rollback()

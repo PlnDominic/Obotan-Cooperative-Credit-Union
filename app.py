@@ -75,8 +75,22 @@ def setup_logging():
 # Call logging setup
 setup_logging()
 
+# Database Configuration
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv(
+    'DATABASE_URL', 
+    'postgresql://obotan_user:DzPV4roNETYpZqCiP7OUyhZ2yt6iXXY2@dpg-cubb26qn91rc7392ehkg-a.oregon-postgres.render.com/obotan'
+)
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+    'connect_args': {
+        'sslmode': 'require'  # Required for Render PostgreSQL
+    }
+}
+
+# Initialize database with SSL
+db.init_app(app)
+
 # Security configurations
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'postgresql://postgres:1234@localhost/obotan')
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', secrets.token_hex(32))
 app.config['DEBUG'] = os.getenv('DEBUG', 'False') == 'True'
 
@@ -86,8 +100,6 @@ app.config['REMEMBER_COOKIE_SECURE'] = True
 app.config['SESSION_COOKIE_HTTPONLY'] = True
 app.config['REMEMBER_COOKIE_HTTPONLY'] = True
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
-
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Session configuration
 app.config['SESSION_TYPE'] = 'filesystem'
